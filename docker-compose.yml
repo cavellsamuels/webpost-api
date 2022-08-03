@@ -1,0 +1,41 @@
+version: '3'
+services:
+    php:
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+        ports:
+            - "9000:9000"
+        volumes:
+            - ./:/srv/app
+        environment:
+            - "DB_PORT=3306"
+            - "DB_HOST=mariadb"
+            - "REDIS_HOST=redis"
+        depends_on:
+          - mariadb
+    web:
+        build:
+            context: ./
+            dockerfile: apache.dockerfile
+        ports:
+            - 8080:80
+        depends_on:
+            - php
+    mariadb:
+        image: mariadb:10.6-focal
+        ports:
+            - "33061:3306"
+        volumes:
+            - mysqldata:/var/lib/mysql
+        environment:
+            - "MARIADB_DATABASE=webpost"
+            - "MARIADB_USER=root"
+            - "MARIADB_PASSWORD=secret"
+            - "MARIADB_ROOT_PASSWORD=secret"
+volumes:
+    mysqldata:
+
+
